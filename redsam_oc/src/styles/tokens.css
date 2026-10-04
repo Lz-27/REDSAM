@@ -1,0 +1,839 @@
+/**
+ * REDSAM · Sistema de diseño
+ * ------------------------------------------------------------
+ * Tokens, bases y efectos del mundo «Red de Señales».
+ * La paleta deriva del ADN real de marca (muestreado de img/logo.jpg
+ * y de las fotografías): señal cian/violeta/magenta/ámbar sobre
+ * superficies de noche índigo y día off-white frío.
+ */
+
+@import "tailwindcss";
+
+@theme {
+  /* ---------- Tipografía ---------- */
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* ---------- Noche (superficies inmersivas) ---------- */
+  --color-night-950: #0a1226;
+  --color-night-900: #101b38;
+  --color-night-800: #182646;
+  --color-night-700: #223258;
+  --color-night-500: #4a5f8c;
+  --color-night-300: #8fa3c7;
+  --color-night-200: #c3cfe4;
+  --color-night-100: #e8eef7;
+
+  /* ---------- Día (superficies editoriales) ---------- */
+  --color-paper: #f6f8fd;
+  --color-surface: #ffffff;
+  --color-line: #e3e8f2;
+  --color-ink-day: #0e1b33;
+  --color-ink-soft: #4a5a7a;
+
+  /* ---------- Señal de marca (degradado del logo) ---------- */
+  --color-signal-cyan: #00c0c0;
+  --color-signal-violet: #7a3f9f;
+  --color-signal-magenta: #e4246c;
+  --color-signal-magenta-deep: #b31254;
+  --color-signal-amber: #f0900c;
+
+  /* ---------- Movimiento ---------- */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* ---------- Animación del carrusel de sponsors (global, fuera de @layer) ---------- */
+@keyframes sponsors-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Hairline señal en hover de tarjeta de logo */
+a:hover .logo-hairline,
+a:focus-visible .logo-hairline {
+  transform: scaleX(1) !important;
+}
+
+/* Respeto prefers-reduced-motion para animación inline */
+@media (prefers-reduced-motion: reduce) {
+  [style*="sponsors-scroll"] {
+    animation: none !important;
+  }
+}
+
+/* ---------- Tema global ----------
+   La página unifica todas sus superficies bajo un único fondo.
+   Tres estados: índigo (oscuro), negro (oscuro puro) y claro.
+   Los componentes usan las utilidades `bg-page*`, `text-fg*`,
+   `text-accent*` y `border-fg-line` en lugar de colores fijos. */
+:root,
+html[data-theme='indigo'] {
+  --surface: var(--color-night-950);
+  --surface-soft: var(--color-night-900);
+  --surface-raised: var(--color-night-900);
+  --text-strong: var(--color-night-100);
+  --text: var(--color-night-200);
+  --text-muted: var(--color-night-300);
+  --line: rgba(255, 255, 255, 0.1);
+  --accent: var(--color-signal-cyan);
+  --accent-cyan: var(--color-signal-cyan);
+  --accent-magenta: var(--color-signal-magenta);
+  --accent-amber: var(--color-signal-amber);
+  --grid-line: var(--color-night-500);
+  --glow: rgba(10, 18, 38, 0.9);
+}
+
+html[data-theme='black'] {
+  --surface: #000000;
+  --surface-soft: #0c0e17;
+  --surface-raised: #121524;
+  --text-strong: #ffffff;
+  --text: #cbd5e1;
+  --text-muted: #94a3b8;
+  --line: rgba(255, 255, 255, 0.12);
+  --accent: var(--color-signal-cyan);
+  --accent-cyan: var(--color-signal-cyan);
+  --accent-magenta: var(--color-signal-magenta);
+  --accent-amber: var(--color-signal-amber);
+  --grid-line: var(--color-night-700);
+  --glow: rgba(0, 0, 0, 0.95);
+}
+
+html[data-theme='light'] {
+  --surface: #f4f6fb;
+  --surface-soft: #ffffff;
+  --surface-raised: #ffffff;
+  --text-strong: #0a1128;
+  --text: #334155;
+  --text-muted: #64748b;
+  --line: rgba(15, 23, 42, 0.12);
+  --accent: #009696;
+  --accent-cyan: #008b8b;
+  --accent-magenta: #c01455;
+  --accent-amber: #d97706;
+  --grid-line: rgba(0, 0, 0, 0.06);
+  --glow: rgba(15, 23, 42, 0.08);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    background-color: var(--surface);
+    transition: background-color 0.5s var(--ease-out);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-signal-amber);
+    color: var(--color-night-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-signal-cyan);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@utility signal-bar {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-signal-cyan) 0%,
+    var(--color-signal-violet) 34%,
+    var(--color-signal-magenta) 67%,
+    var(--color-signal-amber) 100%
+  );
+}
+
+@utility signal-bg {
+  background-image: linear-gradient(
+    115deg,
+    var(--color-signal-cyan) 0%,
+    var(--color-signal-violet) 34%,
+    var(--color-signal-magenta) 67%,
+    var(--color-signal-amber) 100%
+  );
+}
+
+/* ---------- Superficies, texto y acentos según el tema global ---------- */
+/* Nota: se evita el nombre `bg-surface` porque Tailwind lo genera desde
+   el token `--color-surface` (blanco) y pisaría la superficie del tema. */
+@utility bg-page {
+  background-color: var(--surface);
+  transition: background-color 0.4s var(--ease-out), color 0.4s var(--ease-out);
+}
+@utility bg-surface-soft {
+  background-color: var(--surface-soft);
+  transition: background-color 0.4s var(--ease-out), border-color 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+}
+@utility bg-surface-raised {
+  background-color: var(--surface-raised);
+  transition: background-color 0.4s var(--ease-out), border-color 0.4s var(--ease-out);
+}
+@utility bg-surface-glass {
+  background-color: color-mix(in srgb, var(--surface) 88%, transparent);
+  transition: background-color 0.4s var(--ease-out);
+}
+@utility text-fg {
+  color: var(--text);
+  transition: color 0.4s var(--ease-out);
+}
+@utility text-fg-strong {
+  color: var(--text-strong);
+  transition: color 0.4s var(--ease-out);
+}
+@utility text-fg-muted {
+  color: var(--text-muted);
+  transition: color 0.4s var(--ease-out);
+}
+@utility border-fg-line {
+  border-color: var(--line);
+  transition: border-color 0.4s var(--ease-out);
+}
+@utility text-accent {
+  color: var(--accent);
+}
+@utility text-accent-cyan {
+  color: var(--accent-cyan);
+}
+@utility text-accent-magenta {
+  color: var(--accent-magenta);
+}
+@utility text-accent-amber {
+  color: var(--accent-amber);
+}
+
+@layer components {
+  /* Textura de grano sobre superficies oscuras. */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.16;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  }
+
+  /* Grilla cartográfica: finas líneas de territorio.
+     Reservada a superficies-mapa (hero con constelación y footer). */
+  .carto-grid {
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 72px 72px;
+  }
+}
+
+@layer utilities {
+  /* ---------- Revelado por scroll ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition:
+      opacity 0.8s var(--ease-out),
+      transform 0.8s var(--ease-out);
+    will-change: opacity, transform;
+  }
+
+  .reveal-mask {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 1.1s var(--ease-expo);
+  }
+
+  .reveal.is-visible,
+  .reveal-mask.is-visible {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 0% 0);
+  }
+
+  .reveal-delay-1 {
+    transition-delay: 0.08s;
+  }
+  .reveal-delay-2 {
+    transition-delay: 0.16s;
+  }
+  .reveal-delay-3 {
+    transition-delay: 0.24s;
+  }
+  .reveal-delay-4 {
+    transition-delay: 0.32s;
+  }
+
+  /* ---------- Carrusel / marquee ---------- */
+  .marquee-track {
+    animation: marquee 35s linear infinite;
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .marquee-track-reverse {
+    animation: marquee-reverse 42s linear infinite;
+  }
+
+  @keyframes marquee-reverse {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0%);
+    }
+  }
+
+  /* Pista de logos de sponsors — una sola fila, movimiento continuo */
+  .sponsors-track {
+    animation: sponsors-scroll 28s linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes sponsors-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* ---------- Pulso de nodos de la constelación ---------- */
+  .node-pulse::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: 9999px;
+    border: 1px solid var(--color-signal-cyan);
+    animation: node-ring 2.8s var(--ease-out) infinite;
+  }
+
+  @keyframes node-ring {
+    0% {
+      transform: scale(0.4);
+      opacity: 0.9;
+    }
+    70%,
+    100% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+
+  /* ---------- Indicador de scroll (caída suave, sin rebote) ---------- */
+  .scroll-nudge {
+    animation: scroll-nudge 2.2s var(--ease-out) infinite;
+  }
+
+  @keyframes scroll-nudge {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+      animation-timing-function: var(--ease-expo);
+    }
+    55% {
+      transform: translateY(9px);
+      opacity: 0.25;
+      animation-timing-function: var(--ease-out);
+    }
+    100% {
+      transform: translateY(9px);
+      opacity: 0.25;
+    }
+  }
+
+  /* ---------- Movimiento de la señal (hero) ---------- */
+  .signal-dash {
+    stroke-dasharray: 12 10;
+    animation: dash-flow 2.4s linear infinite;
+  }
+
+  @keyframes dash-flow {
+    to {
+      stroke-dashoffset: -44;
+    }
+  }
+
+  /* ---------- Flotación suave de acentos ---------- */
+  .float-slow {
+    animation: floaty 7s ease-in-out infinite;
+  }
+
+  @keyframes floaty {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* ---------- Constelación viva (hero) ---------- */
+  .node {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition:
+      transform 0.35s var(--ease-out),
+      filter 0.35s var(--ease-out);
+  }
+  .node.is-active {
+    transform: scale(1.9);
+    filter: drop-shadow(0 0 12px var(--nc, #00c0c0));
+  }
+  .node-seg {
+    opacity: 0;
+    transition: opacity 0.35s var(--ease-out);
+  }
+  .node-seg.is-active {
+    opacity: 0.95;
+    filter: drop-shadow(0 0 6px var(--color-signal-cyan));
+  }
+  .hero-cursor-glow {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(var(--mx, -999px), var(--my, -999px)) translate(-50%, -50%);
+    z-index: 2;
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle,
+      rgba(0, 192, 192, 0.14) 0%,
+      rgba(228, 36, 108, 0.06) 45%,
+      transparent 65%
+    );
+    transition: opacity 0.5s var(--ease-out);
+  }
+
+  /* ---------- Sublínea de navegación (señal) ---------- */
+  .nav-link {
+    position: relative;
+  }
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -7px;
+    height: 2px;
+    width: 100%;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      var(--color-signal-cyan),
+      var(--color-signal-violet),
+      var(--color-signal-magenta)
+    );
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s var(--ease-out);
+  }
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* ---------- Brillo de barrido en botones de señal ---------- */
+  .btn-shine {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .btn-shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.4) 50%, transparent 68%);
+    transform: translateX(-130%) skewX(-8deg);
+    transition: transform 0.8s var(--ease-out);
+  }
+  .btn-shine:hover::after {
+    transform: translateX(130%) skewX(-8deg);
+  }
+
+  /* ---------- Progreso de autoplay en galería ---------- */
+  .gallery-progress {
+    transform-origin: left;
+    animation: gallery-progress 6s linear forwards;
+  }
+  @keyframes gallery-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  /* ---------- Ventana modal de actividades ---------- */
+  @keyframes overlay-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ---------- Map Animations ---------- */
+  .province-path {
+    stroke-dasharray: var(--path-length, 2000);
+    stroke-dashoffset: var(--path-length, 2000);
+    animation: draw-province 1.2s ease forwards, fill-reveal 0.8s ease forwards;
+    animation-delay: calc(var(--i, 0) * 120ms), calc(1.2s + (var(--i, 0) * 120ms));
+    fill-opacity: 0;
+  }
+
+  .province-path:hover {
+    filter: drop-shadow(0 8px 20px rgba(0, 192, 192, 0.4));
+    transform: scale(1.015);
+    transform-origin: center;
+    fill-opacity: 0.4;
+  }
+
+  @keyframes draw-province {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes fill-reveal {
+    from {
+      fill-opacity: 0;
+    }
+    to {
+      fill-opacity: var(--target-opacity, 0.8);
+    }
+  }
+
+  .node-pulse-ring {
+    position: absolute;
+    inset: -8px;
+    border-radius: 9999px;
+    border: 1px solid var(--color-signal-cyan);
+    animation: node-ring 2.8s var(--ease-out) infinite;
+  }
+
+  .node-pulse-ring:nth-child(2) {
+    animation-delay: 0.9s;
+  }
+
+  .node-pulse-ring:nth-child(3) {
+    animation-delay: 1.8s;
+  }
+
+  /* ---------- Accesibilidad de movimiento ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal,
+    .reveal-mask {
+      opacity: 1;
+      transform: none;
+      clip-path: none;
+      transition: none;
+    }
+    .marquee-track,
+    .marquee-track-reverse,
+    .sponsors-track,
+    .signal-dash,
+    .node-pulse::before,
+    .float-slow,
+    .scroll-nudge,
+    .gallery-progress {
+      animation: none;
+    }
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  /* ==========================================================
+     HeroCarousel — carrusel cuadrado premium del Hero
+     ========================================================== */
+
+  .hero-carousel-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .hero-carousel-frame {
+    position: relative;
+    border-radius: 28px;
+    overflow: hidden;
+    background: var(--surface-soft);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.08),
+      0 32px 90px rgba(0,0,0,0.5),
+      0 0 80px rgba(0,192,192,0.12);
+  }
+
+  .hero-carousel-border-top {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    border-radius: 28px;
+    pointer-events: none;
+    padding: 2px;
+    background: linear-gradient(135deg, #00c0c0 0%, #7a3f9f 38%, #e4246c 72%, #f0900c 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .hero-carousel-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+    border-radius: 28px 28px 0 0;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-carousel-stage {
+      aspect-ratio: 1 / 1.02;
+    }
+  }
+
+  .hero-carousel-stage:active {
+    cursor: grabbing;
+  }
+
+  .hero-carousel-slide {
+    position: absolute;
+    inset: 0;
+    border-radius: 28px 28px 0 0;
+    overflow: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+
+  .hero-carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+    pointer-events: none;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .hero-carousel-stage:hover .hero-carousel-img {
+    transform: scale(1.035);
+  }
+
+  .hero-carousel-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 45%,
+      rgba(0,0,0,0.4) 70%,
+      rgba(0,0,0,0.8) 100%
+    );
+    border-radius: inherit;
+  }
+
+  .hero-carousel-caption {
+    position: absolute;
+    bottom: 20px;
+    left: 22px;
+    right: 22px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 5;
+  }
+
+  .hero-carousel-caption span {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.95);
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(10, 18, 38, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+
+  /* Arrow buttons */
+  .hero-carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    background: rgba(10, 18, 38, 0.5);
+    color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease,
+      transform 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+
+  .hero-carousel-arrow:hover {
+    background: rgba(0, 192, 192, 0.35);
+    border-color: rgba(0, 192, 192, 0.8);
+    box-shadow: 0 0 20px rgba(0, 192, 192, 0.45);
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .hero-carousel-arrow-left  { left: 16px; }
+  .hero-carousel-arrow-right { right: 16px; }
+
+  /* Bottom bar */
+  .hero-carousel-progress-bar {
+    height: 2.5px;
+    background: rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+
+  .hero-carousel-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00c0c0, #7a3f9f, #e4246c, #f0900c);
+    transform-origin: left;
+  }
+
+  .hero-carousel-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 0 14px;
+  }
+
+  .hero-carousel-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    border: none;
+    cursor: pointer;
+    transition:
+      background 0.3s ease,
+      transform 0.3s ease,
+      width 0.3s ease;
+  }
+
+  .hero-carousel-dot.is-active {
+    width: 26px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #00c0c0, #e4246c);
+    transform: none;
+  }
+
+  .hero-carousel-counter {
+    position: absolute;
+    bottom: 20px;
+    right: 22px;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    z-index: 5;
+  }
+
+  .hero-carousel-counter-current {
+    color: rgba(255,255,255,0.95);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .hero-carousel-counter-sep {
+    opacity: 0.4;
+    font-size: 11px;
+  }
+
+  /* ==========================================================
+     FloatingParticles — partículas CSS sutiles de fondo
+     ========================================================== */
+
+  .floating-particle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(1px);
+    animation: fp-float linear infinite alternate;
+  }
+
+  @keyframes fp-float {
+    0% {
+      transform: translateY(0px) translateX(0px) scale(1);
+      opacity: var(--fpo, 0.15);
+    }
+    33% {
+      transform: translateY(-14px) translateX(8px) scale(1.15);
+    }
+    66% {
+      transform: translateY(-6px) translateX(-10px) scale(0.88);
+    }
+    100% {
+      transform: translateY(-20px) translateX(4px) scale(1.05);
+      opacity: calc(var(--fpo, 0.15) * 0.4);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floating-particle,
+    .hero-carousel-progress-fill,
+    .hero-carousel-img {
+      animation: none;
+      transition: none;
+    }
+  }
+}
