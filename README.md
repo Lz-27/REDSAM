@@ -1,5 +1,6 @@
 # REDSAM · Red de Jóvenes Líderes de San Martín
 https://github.com/user-attachments/assets/9612a4ce-89e3-4c9b-852f-164beaff23f0
+
 Plataforma web full-stack oficial de **REDSAM**, una organización que impulsa y fortalece el liderazgo, la formación continua, el voluntariado comunitario y la ayuda social en las 10 provincias de la región San Martín, Perú.
 
 El proyecto está diseñado bajo una arquitectura desacoplada y moderna que integra una experiencia de usuario inmersiva en el frontend con una API REST robusta y asíncrona en el backend.
